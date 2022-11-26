@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 require("dotenv").config();
 
-app.get((req, res) => {
+app.get("/", (req, res) => {
   res.send("Furniture Shala Running");
 });
 
@@ -26,9 +26,17 @@ async function run() {
       .db("furniture-shala")
       .collection("products");
 
-    // post products on server
+    // send products data on server
     app.post("/products", async (req, res) => {
-      res.send(await productCollection.insertOne(req.body));
+      const result = await productCollection.insertOne(req.body);
+      res.send(result);
+    });
+    // get product data from server
+    app.get("/products/:email", async (req, res) => {
+      const products = await productCollection
+        .find({ sellerEmail: req.params.email })
+        .toArray();
+      res.send(products);
     });
   } finally {
   }
