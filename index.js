@@ -32,9 +32,16 @@ async function run() {
       res.send(result);
     });
 
-    // get all product from server
+    // get all product by initial or by category query from server
     app.get("/products", async (req, res) => {
-      const products = await productCollection.find({}).toArray();
+      let query = {};
+      const category = req.query.category;
+      if (category) {
+        query = {
+          categories: category,
+        };
+      }
+      const products = await productCollection.find(query).toArray();
       res.send(products);
     });
 
@@ -45,6 +52,16 @@ async function run() {
         .toArray();
       res.send(products);
     });
+
+    // get product data by categories name
+    // app.get("/products/:category", async (req, res) => {
+    //   console.log(req.params);
+
+    //   const categoriesProduct = await productCollection
+    //     .find({ categories: req.params.category })
+    //     .toArray();
+    //   res.send(categoriesProduct);
+    // });
 
     // update advertisment status
     app.patch("/products/:id", async (req, res) => {
