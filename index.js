@@ -13,6 +13,9 @@ app.get("/", (req, res) => {
   res.send("Furniture Shala Running");
 });
 
+// stripe key
+const stripe = require("stripe")(process.env.STRIPE_SK);
+
 // create jwt token
 app.post("/jwt", (req, res) => {
   const user = req.body;
@@ -175,6 +178,29 @@ async function run() {
         .find({ email: req.params.email })
         .toArray();
       res.send(orders);
+    });
+    //get single order
+    app.get("/orders/payment/:id", async (req, res) => {
+      const orders = await ordersCollection.findOne({
+        _id: ObjectId(req.params.id),
+      });
+
+      res.send(orders);
+    });
+
+    // stripe payment intention
+    app.post("/create-payment-intent", async (req, res) => {
+      const price = req.body.price;
+      const amount = price * 100; // convert price into decimal / paisa পয়সা
+
+      const paymentIntents = await stripe.paymentIntents.create({
+        currency: "usd",
+        amount,
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntents.client_secret,
+      });
     });
   } finally {
   }
