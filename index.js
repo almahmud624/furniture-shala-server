@@ -87,6 +87,31 @@ async function run() {
       const user = await usersCollection.find({}).toArray();
       res.send(user);
     });
+    // set role admin
+    app.patch("/user/role/:id", async (req, res) => {
+      const makeAdmin = {
+        $set: {
+          role: req.body.role,
+          previousRole: req.body.previousRole,
+        },
+      };
+      const result = await usersCollection.updateOne(
+        { _id: ObjectId(req.params.id) },
+        makeAdmin
+      );
+      res.send(result);
+    });
+    // user role check
+    app.get("/user/role/:email", async (req, res) => {
+      const user = await usersCollection.findOne({ email: req.params.email });
+      res.send(user);
+    });
+
+    // admin role check
+    app.get("/user/admin/:email", async (req, res) => {
+      const user = await usersCollection.findOne({ email: req.params.email });
+      res.send({ isAdmin: user?.role === "admin" });
+    });
   } finally {
   }
 }
