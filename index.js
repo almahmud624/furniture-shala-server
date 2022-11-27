@@ -53,28 +53,26 @@ async function run() {
       res.send(products);
     });
 
-    // get product data by categories name
-    // app.get("/products/:category", async (req, res) => {
-    //   console.log(req.params);
-
-    //   const categoriesProduct = await productCollection
-    //     .find({ categories: req.params.category })
-    //     .toArray();
-    //   res.send(categoriesProduct);
-    // });
-
     // update advertisment status
     app.patch("/products/:id", async (req, res) => {
       const query = { _id: ObjectId(req.params.id) };
-      const updateAdvertisement = {
-        $set: {
-          advertisement: req.body.advertisement,
-        },
-      };
-      const result = await productCollection.updateOne(
-        query,
-        updateAdvertisement
-      );
+      const updateSet = req.body.updateSet;
+
+      let updateAbleItems;
+      if (updateSet === "advertisement") {
+        updateAbleItems = {
+          $set: {
+            advertisement: req.body.advertisement,
+          },
+        };
+      } else if (updateSet === "wishListed") {
+        updateAbleItems = {
+          $set: {
+            wishListed: req.body.wishListed,
+          },
+        };
+      }
+      const result = await productCollection.updateOne(query, updateAbleItems);
       res.send(result);
     });
   } finally {
