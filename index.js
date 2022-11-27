@@ -26,6 +26,10 @@ async function run() {
       .db("furniture-shala")
       .collection("products");
     const usersCollection = client.db("furniture-shala").collection("users");
+    const wishListCollection = client
+      .db("furniture-shala")
+      .collection("wishList");
+    const ordersCollection = client.db("furniture-shala").collection("orders");
 
     // send products data on server
     app.post("/products", async (req, res) => {
@@ -54,7 +58,7 @@ async function run() {
       res.send(products);
     });
 
-    // update advertisment status
+    // update wishlist & advertisment status
     app.patch("/products/:id", async (req, res) => {
       const query = { _id: ObjectId(req.params.id) };
       const updateSet = req.body.updateSet;
@@ -77,8 +81,29 @@ async function run() {
       res.send(result);
     });
 
+    // store wishItem
+    app.post("/products/wishlist", async (req, res) => {
+      const wishList = await wishListCollection.insertOne(req.body);
+      res.send(wishList);
+    });
+
+    // collect wishitem based on email
+    app.get("/products/wishlist/:email", async (req, res) => {
+      const wishList = await wishListCollection
+        .find({ userEmail: req.params.email })
+        .toArray();
+      res.send(wishList);
+    });
+
     // store user
     app.post("/user", async (req, res) => {
+      const duplicateUser = await usersCollection
+        .find({ email: req.body.email })
+        .toArray();
+
+      if (duplicateUser.length) {
+        return;
+      }
       const result = await usersCollection.insertOne(req.body);
       res.send(result);
     });
@@ -111,6 +136,19 @@ async function run() {
     app.get("/user/admin/:email", async (req, res) => {
       const user = await usersCollection.findOne({ email: req.params.email });
       res.send({ isAdmin: user?.role === "admin" });
+    });
+
+    // store user order
+    app.post("/orders", async (req, res) => {
+      const result = await ordersCollection.insertOne(req.body);
+      res.send(result);
+    });
+    // get user order based on user email
+    app.get("/orders/:email", async (req, res) => {
+      const orders = await ordersCollection
+        .find({ email: req.params.email })
+        .toArray();
+      res.send(orders);
     });
   } finally {
   }
