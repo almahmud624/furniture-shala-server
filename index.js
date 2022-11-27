@@ -7,13 +7,39 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
 app.get("/", (req, res) => {
   res.send("Furniture Shala Running");
 });
 
-const uri = process.env.DB_URL;
+// create jwt token
+app.post("/jwt", (req, res) => {
+  const user = req.body;
+  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: "1d",
+  });
+  res.send({ token });
+});
 
+// jwt verify function
+const verifyJWT = (req, res, next) => {
+  const jwtHeaders = req.headers.authorization;
+  if (!jwtHeaders) {
+    return res.status(401).send({ message: "Unauthorized Access" });
+  }
+
+  const token = jwtHeaders.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).send("Forbidden Access");
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
+const uri = process.env.DB_URL;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -59,7 +85,7 @@ async function run() {
     });
 
     // update wishlist & advertisment status
-    app.patch("/products/:id", async (req, res) => {
+    app.patch("/products/:id", verifyJWT, async (req, res) => {
       const query = { _id: ObjectId(req.params.id) };
       const updateSet = req.body.updateSet;
 
@@ -144,7 +170,7 @@ async function run() {
       res.send(result);
     });
     // get user order based on user email
-    app.get("/orders/:email", async (req, res) => {
+    app.get("/orders/:email", verifyJWT, async (req, res) => {
       const orders = await ordersCollection
         .find({ email: req.params.email })
         .toArray();
