@@ -25,6 +25,7 @@ async function run() {
     const productCollection = client
       .db("furniture-shala")
       .collection("products");
+    const usersCollection = client.db("furniture-shala").collection("users");
 
     // send products data on server
     app.post("/products", async (req, res) => {
@@ -74,6 +75,17 @@ async function run() {
       }
       const result = await productCollection.updateOne(query, updateAbleItems);
       res.send(result);
+    });
+
+    // store user
+    app.post("/user", async (req, res) => {
+      const result = await usersCollection.insertOne(req.body);
+      res.send(result);
+    });
+    // get user
+    app.get("/user", async (req, res) => {
+      const user = await usersCollection.find({}).toArray();
+      res.send(user);
     });
   } finally {
   }
