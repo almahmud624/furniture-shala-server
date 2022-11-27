@@ -59,6 +59,9 @@ async function run() {
       .db("furniture-shala")
       .collection("wishList");
     const ordersCollection = client.db("furniture-shala").collection("orders");
+    const paymentCollection = client
+      .db("furniture-shala")
+      .collection("payments");
 
     // send products data on server
     app.post("/products", async (req, res) => {
@@ -200,6 +203,34 @@ async function run() {
       });
       res.send({
         clientSecret: paymentIntents.client_secret,
+      });
+
+      // store payment data
+      app.post("/payments", async (req, res) => {
+        const result = await paymentCollection.insertOne(req.body);
+        const orderFilter = { _id: ObjectId(req.body.orderId) };
+        const updateDoc = {
+          $set: {
+            paid: true,
+          },
+        };
+        const updatedOrder = await ordersCollection.updateOne(
+          orderFilter,
+          updateDoc,
+          true
+        );
+        const stockUpdate = {
+          $set: {
+            inStock: "sold",
+            advertisement: false,
+          },
+        };
+        const updateProduct = await productCollection.updateOne(
+          { _id: ObjectId(req.body.productId) },
+          stockUpdate,
+          true
+        );
+        res.send(result);
       });
     });
   } finally {
