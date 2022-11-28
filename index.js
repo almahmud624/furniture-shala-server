@@ -170,6 +170,21 @@ async function run() {
       res.send({ isAdmin: user?.role === "admin" });
     });
 
+    //get seller
+    app.get("/user/seller", async (req, res) => {
+      const seller = await usersCollection.find({ role: "seller" }).toArray();
+
+      res.send(seller);
+    });
+
+    // delete seller
+    app.delete("/user/seller/:id", async (req, res) => {
+      const result = await usersCollection.deleteOne({
+        _id: ObjectId(req.params.id),
+      });
+      res.send(result);
+    });
+
     // store user order
     app.post("/orders", async (req, res) => {
       const result = await ordersCollection.insertOne(req.body);
