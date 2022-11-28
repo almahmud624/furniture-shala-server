@@ -185,6 +185,31 @@ async function run() {
       res.send(result);
     });
 
+    // verify seller
+    app.patch("/user/seller/:email", async (req, res) => {
+      console.log(req.params.email);
+
+      const updateSeller = {
+        $set: {
+          verfiedSeller: true,
+        },
+      };
+      const result = await usersCollection.updateOne(
+        { email: req.params.email },
+        updateSeller
+      );
+      const updateVerfiySeller = {
+        $set: {
+          sellerVerify: true,
+        },
+      };
+      const verfieidSeller = await productCollection.updateMany(
+        { sellerEmail: req.params.email },
+        updateVerfiySeller
+      );
+      res.send(result);
+    });
+
     // store user order
     app.post("/orders", async (req, res) => {
       const result = await ordersCollection.insertOne(req.body);
