@@ -210,6 +210,18 @@ async function run() {
       res.send(result);
     });
 
+    // get all buyers
+    app.get("/user/buyers", async (req, res) => {
+      const buyers = await usersCollection.find({ role: "user" }).toArray();
+      res.send(buyers);
+    });
+    // delete buyers
+    app.delete("/user/buyers/:id", async (req, res) => {
+      const result = await usersCollection.deleteOne({
+        _id: ObjectId(req.params.id),
+      });
+      res.send(result);
+    });
     // store user order
     app.post("/orders", async (req, res) => {
       const result = await ordersCollection.insertOne(req.body);
