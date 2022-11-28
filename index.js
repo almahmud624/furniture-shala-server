@@ -28,6 +28,8 @@ app.post("/jwt", (req, res) => {
 // jwt verify function
 const verifyJWT = (req, res, next) => {
   const jwtHeaders = req.headers.authorization;
+  console.log(jwtHeaders);
+
   if (!jwtHeaders) {
     return res.status(401).send({ message: "Unauthorized Access" });
   }
@@ -62,6 +64,9 @@ async function run() {
     const paymentCollection = client
       .db("furniture-shala")
       .collection("payments");
+    const reportdItemCollection = client
+      .db("furniture-shala")
+      .collection("reportedItems");
 
     // send products data on server
     app.post("/products", async (req, res) => {
@@ -186,7 +191,7 @@ async function run() {
     });
 
     // verify seller
-    app.patch("/user/seller/:email", async (req, res) => {
+    app.patch("/user/seller/:email", verifyJWT, async (req, res) => {
       console.log(req.params.email);
 
       const updateSeller = {
@@ -234,7 +239,7 @@ async function run() {
         .toArray();
       res.send(orders);
     });
-    //get single order
+    //get single product
     app.get("/orders/payment/:id", async (req, res) => {
       const orders = await ordersCollection.findOne({
         _id: ObjectId(req.params.id),
