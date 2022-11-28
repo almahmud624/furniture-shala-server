@@ -28,8 +28,6 @@ app.post("/jwt", (req, res) => {
 // jwt verify function
 const verifyJWT = (req, res, next) => {
   const jwtHeaders = req.headers.authorization;
-  console.log(jwtHeaders);
-
   if (!jwtHeaders) {
     return res.status(401).send({ message: "Unauthorized Access" });
   }
