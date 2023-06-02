@@ -230,6 +230,46 @@ async function run() {
       const result = await ordersCollection.insertOne(req.body);
       res.send(result);
     });
+    // get all order
+    app.get("/orders", async (req, res) => {
+      const orders = await ordersCollection.find({}).toArray();
+      const mostSelledProducts = await productCollection
+        .find({})
+        .sort({ totalSelled: -1 })
+        .limit(5)
+        .toArray();
+      async function countDuplicates(array, property) {
+        const countObj = {};
+
+        // Count the occurrences of each value in the specified property
+        for (let i = 0; i < array.length; i++) {
+          const element = array?.[i][property];
+          countObj[element] = (countObj[element] || 0) + 1;
+        }
+
+        // Print the counts of duplicate values
+        for (let element in countObj) {
+          if (countObj[element] > 1) {
+            const totalSelled = {
+              $set: { totalSelled: countObj[element] },
+            };
+            await productCollection.updateOne(
+              { _id: ObjectId(element) },
+              totalSelled,
+              true,
+              function (err, result) {
+                if (err) {
+                  console.error("Failed to update document:", err);
+                  return;
+                }
+              }
+            );
+          }
+        }
+      }
+      countDuplicates(orders, "productId");
+      res.send(mostSelledProducts);
+    });
     // get user order based on user email
     app.get("/orders/:email", verifyJWT, async (req, res) => {
       const orders = await ordersCollection
