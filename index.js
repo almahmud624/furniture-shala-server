@@ -231,9 +231,9 @@ async function run() {
       res.send(result);
     });
     // get all order
-    app.get("/orders", async (req, res) => {
+    app.get("/most-sold", async (req, res) => {
       const orders = await ordersCollection.find({}).toArray();
-      const mostSelledProducts = await productCollection
+      const mostSoldProducts = await productCollection
         .find({})
         .sort({ totalSelled: -1 })
         .limit(5)
@@ -268,7 +268,7 @@ async function run() {
         }
       }
       countDuplicates(orders, "productId");
-      res.send(mostSelledProducts);
+      res.send(mostSoldProducts);
     });
     // get user order based on user email
     app.get("/orders/:email", verifyJWT, async (req, res) => {
