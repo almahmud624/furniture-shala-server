@@ -236,7 +236,7 @@ async function run() {
       const mostSoldProducts = await productCollection
         .find({})
         .sort({ totalSelled: -1 })
-        .limit(5)
+        .limit(4)
         .toArray();
       async function countDuplicates(array, property) {
         const countObj = {};
