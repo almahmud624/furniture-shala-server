@@ -74,6 +74,9 @@ async function run() {
 
     // get all product by initial or by category query from server
     app.get("/products", async (req, res) => {
+      const limit = parseInt(req.query?._limit);
+      const skip = (parseInt(req.query?._page) - 1) * limit;
+
       let query = {};
       const category = req.query.category;
       if (category) {
@@ -81,7 +84,11 @@ async function run() {
           categories: category,
         };
       }
-      const products = await productCollection.find(query).toArray();
+      const products = await productCollection
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .toArray();
       res.send(products);
     });
 
