@@ -137,6 +137,18 @@ async function run() {
       res.send(wishList);
     });
 
+    // delete wishlist item
+    app.delete("/products/wishlist/:id", async (req, res) => {
+      const result = await wishListCollection.deleteOne({
+        _id: ObjectId(req.params.id),
+      });
+      if (result.deletedCount === 1) {
+        res.status(200).send("Wish item deleted successfully");
+      } else {
+        res.status(404).send("Wish item not found");
+      }
+    });
+
     // store user
     app.post("/user", async (req, res) => {
       const duplicateUser = await usersCollection
