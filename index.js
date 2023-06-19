@@ -92,6 +92,17 @@ async function run() {
       res.send(products);
     });
 
+    app.delete("/products/:id", async (req, res) => {
+      const result = await productCollection.deleteOne({
+        _id: ObjectId(req.params.id),
+      });
+      if (result.deletedCount === 1) {
+        res.status(200).send("Product deleted successfully");
+      } else {
+        res.status(404).send("Product not found");
+      }
+    });
+
     // get product data from server by seller email
     app.get("/products/:email", async (req, res) => {
       const products = await productCollection
