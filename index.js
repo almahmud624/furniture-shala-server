@@ -103,6 +103,14 @@ async function run() {
       }
     });
 
+    // get single product
+    app.get("/products/:id", async (req, res) => {
+      const product = await productCollection
+        .find({ _id: ObjectId(req.params.id) })
+        .toArray();
+      res.send(product);
+    });
+
     // get product data from server by seller email
     app.get("/products/:email", async (req, res) => {
       const products = await productCollection
