@@ -104,7 +104,7 @@ async function run() {
     });
 
     // get single product
-    app.get("/products/:id", async (req, res) => {
+    app.get("/product/:id", async (req, res) => {
       const product = await productCollection
         .find({ _id: ObjectId(req.params.id) })
         .toArray();
